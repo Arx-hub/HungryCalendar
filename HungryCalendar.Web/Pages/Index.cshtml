@@ -1,0 +1,166 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Reserve Your Table";
+}
+
+@if (Model.BookingSuccess)
+{
+    <section id="confirmation-page" class="confirmation-page">
+        <div class="confirmation-card">
+            <div class="success-icon">✓</div>
+            <h1>Reservation successful</h1>
+            <p class="confirmation-message">Your table has been reserved. We look forward to seeing you!</p>
+            
+            <div class="reservation-summary">
+                <h3>Booking Details</h3>
+                <div class="detail-row">
+                    <span>Name:</span>
+                    <span>@Model.Name</span>
+                </div>
+                <div class="detail-row">
+                    <span>Email:</span>
+                    <span>@Model.Email</span>
+                </div>
+                <div class="detail-row">
+                    <span>Phone:</span>
+                    <span>@Model.Phone</span>
+                </div>
+                <div class="detail-row">
+                    <span>Date:</span>
+                    <span class="details-date">@Model.Date</span>
+                </div>
+                <div class="detail-row">
+                    <span>Time:</span>
+                    <span class="details-time">@Model.SelectedTime</span>
+                </div>
+                <div class="detail-row">
+                    <span>Guests:</span>
+                    <span class="details-guests">@Model.GroupSize</span>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <h3>Contact Us</h3>
+                <p>123 Dining Street, Helsinki</p>
+                <p>Phone: +358 9 123 456</p>
+                <p>Email: hello@hungrycalendar.com</p>
+            </div>
+
+            <a asp-page="/Index" class="btn-primary">Book Another</a>
+        </div>
+    </section>
+}
+else
+{
+    <section class="hero">
+        <h1>Reserve Your Table</h1>
+        <p>Taste the excellence in every moment.</p>
+    </section>
+
+    <section class="booking-section">
+        <div class="booking-card">
+            <form method="get" id="search-form" class="search-controls">
+                <div class="control-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="Date" value="@Model.Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="this.form.submit()">
+                </div>
+                <div class="control-group">
+                    <label for="group-size">Guests</label>
+                    <select id="group-size" name="GroupSize" onchange="this.form.submit()">
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <!option value="@i" @(Model.GroupSize == i ? "selected" : "")>@i @(i == 1 ? "Person" : "People")</!option>
+                        }
+                    </select>
+                </div>
+            </form>
+
+            @if (!string.IsNullOrEmpty(Model.InfoMessage))
+            {
+                <div class="no-times-message">
+                    @Model.InfoMessage
+                </div>
+            }
+            else
+            {
+                <div id="slots-container" class="calendar-container @(Model.ShowForm ? "form-view" : "")">
+                    <div class="time-section">
+                        <h3>Lunch Service <span>(Until 2:00 PM)</span></h3>
+                        <div class="time-grid" id="lunch-slots">
+                            @foreach (var time in Model.LunchSlots)
+                            {
+                                bool isSelected = Model.SelectedTime == time;
+                                <form method="post" asp-page-handler="SelectTime" asp-route-time="@time" style="display:inline;">
+                                    <input type="hidden" name="Date" value="@Model.Date" />
+                                    <input type="hidden" name="GroupSize" value="@Model.GroupSize" />
+                                    <button type="submit" class="time-slot available @(isSelected ? "selected" : "")" @(Model.ShowForm && !isSelected ? "disabled" : "")>@time</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="time-section">
+                        <h3>Afternoon & Dinner <span>(From 2:00 PM)</span></h3>
+                        <div class="time-grid" id="afternoon-slots">
+                            @foreach (var time in Model.AfternoonSlots)
+                            {
+                                bool isSelected = Model.SelectedTime == time;
+                                <form method="post" asp-page-handler="SelectTime" asp-route-time="@time" style="display:inline;">
+                                    <input type="hidden" name="Date" value="@Model.Date" />
+                                    <input type="hidden" name="GroupSize" value="@Model.GroupSize" />
+                                    <button type="submit" class="time-slot available @(isSelected ? "selected" : "")" @(Model.ShowForm && !isSelected ? "disabled" : "")>@time</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ShowForm)
+            {
+                <div id="reservation-form-container" class="reservation-form-container">
+                    <div class="form-header">
+                        <h3>Complete Your Reservation</h3>
+                        <p id="selected-slot-info">Booking for @Model.SelectedTime on @Model.Date</p>
+                    </div>
+                    <form method="post" asp-page-handler="Confirm" id="reservation-form">
+                        <input type="hidden" asp-for="Date" />
+                        <input type="hidden" asp-for="GroupSize" />
+                        <input type="hidden" asp-for="SelectedTime" />
+                        
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label asp-for="Name">Full Name</label>
+                                <input asp-for="Name" id="name" placeholder="John Doe" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="input-group">
+                                <label asp-for="Email">Email Address</label>
+                                <input asp-for="Email" id="email" placeholder="john@example.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="input-group full-width">
+                                <label asp-for="Phone">Phone Number</label>
+                                <input asp-for="Phone" id="phone" placeholder="+358 40 123 4567" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="error-message">@Model.ErrorMessage</div>
+                        }
+
+                        <button type="submit" id="submit-reservation" class="btn-primary">Confirm Reservation</button>
+                        <button type="submit" asp-page-handler="Back" id="cancel-reservation" class="btn-secondary" formnovalidate>Back to Times</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
