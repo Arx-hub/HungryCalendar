@@ -1,0 +1,151 @@
+@page
+@model AdminModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container">
+    @if (!Model.IsLoggedIn)
+    {
+        <div class="hero">
+            <h1>Admin Login</h1>
+            <p>Manage reservations and restaurant settings.</p>
+        </div>
+
+        <div class="booking-card" style="max-width: 400px;">
+            <form method="post" asp-page-handler="Login">
+                <div class="input-group mb-3">
+                    <label>Username</label>
+                    <input asp-for="Username" value="admin" class="form-control" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); color: white; border-radius: 12px; padding: 1rem;" />
+                </div>
+                <div class="input-group mb-4">
+                    <label>Password</label>
+                    <input asp-for="Password" type="password" value="1234" class="form-control" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); color: white; border-radius: 12px; padding: 1rem;" />
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="error-message">@Model.ErrorMessage</div>
+                }
+
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="admin-header d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p class="text-muted">Managing reservations for <strong>@Model.Date</strong></p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <label class="text-muted small text-uppercase">Select Date:</label>
+                    <input type="date" name="Date" value="@Model.Date" class="form-control" onchange="this.form.submit()" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); color: white; border-radius: 8px; font-size: 0.9rem;">
+                </form>
+                <form method="post" asp-page-handler="Logout">
+                    <button type="submit" class="btn-secondary" style="width: auto; padding: 0.5rem 1.5rem;">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="booking-card mb-4" style="max-width: none;">
+                    <h3>Reservations on @Model.Date</h3>
+                    <div class="table-responsive mt-3">
+                        <table class="table" style="color: var(--text-light); border-collapse: separate; border-spacing: 0 10px;">
+                            <thead>
+                                <tr style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                                    <th>Customer</th>
+                                    <th>Time</th>
+                                    <th>Guests</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var res in Model.DateReservations)
+                                {
+                                    <tr style="background: rgba(255,255,255,0.03);">
+                                        <td style="padding: 1rem; border-radius: 12px 0 0 12px;">
+                                            <div><strong>@res.Name</strong></div>
+                                            <small class="text-muted">@res.Email</small>
+                                        </td>
+                                        <td><span class="badge" style="background: var(--primary);">@res.Time</span></td>
+                                        <td><strong>@res.GroupSize</strong></td>
+                                        <td style="border-radius: 0 12px 12px 0;">
+                                            <form method="post" asp-page-handler="DeleteReservation" asp-route-id="@res.Id">
+                                                <input type="hidden" name="Date" value="@Model.Date" />
+                                                <button type="submit" class="btn-link" style="color: var(--error); background: none; border: none; cursor: pointer;">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!Model.DateReservations.Any())
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">No reservations for this date</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="booking-card" style="max-width: none;">
+                    <h3>Manage Timeline</h3>
+                    <p class="text-muted small mb-4">Click slots to block them from customer view</p>
+                    
+                    <div class="time-section mb-4">
+                        <h4>Lunch Service</h4>
+                        <div class="time-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            @foreach (var t in Model.LunchSlots)
+                            {
+                                var res = Model.DateReservations.FirstOrDefault(r => r.Time == t);
+                                bool isDisabled = Model.DisabledTimes.Contains(t);
+                                <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
+                                    <input type="hidden" name="Date" value="@Model.Date" />
+                                    <button type="submit" class="time-slot @(isDisabled ? "reserved" : (res != null ? "selected" : "available"))" 
+                                            style="width: 100%; font-size: 0.8rem; padding: 0.5rem; @(isDisabled ? "border-color: var(--error); color: var(--error);" : "")"
+                                            title="@(res != null ? $"Reserved by {res.Name}" : "")">
+                                        @t @(res != null ? " (R)" : "")
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="time-section">
+                        <h4>Afternoon & Dinner</h4>
+                        <div class="time-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            @foreach (var t in Model.AfternoonSlots)
+                            {
+                                var res = Model.DateReservations.FirstOrDefault(r => r.Time == t);
+                                bool isDisabled = Model.DisabledTimes.Contains(t);
+                                <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
+                                    <input type="hidden" name="Date" value="@Model.Date" />
+                                    <button type="submit" class="time-slot @(isDisabled ? "reserved" : (res != null ? "selected" : "available"))" 
+                                            style="width: 100%; font-size: 0.8rem; padding: 0.5rem; @(isDisabled ? "border-color: var(--error); color: var(--error);" : "")"
+                                            title="@(res != null ? $"Reserved by {res.Name}" : "")">
+                                        @t @(res != null ? " (R)" : "")
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .admin-header h1 { margin-bottom: 0; }
+    .table th { border: none; }
+    .table td { border: none; vertical-align: middle; }
+    h3 { font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; color: var(--primary); }
+    h4 { font-size: 1rem; color: var(--text-muted); margin: 1rem 0; }
+</style>

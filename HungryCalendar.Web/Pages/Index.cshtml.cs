@@ -1,11 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using HungryCalendar.Web.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HungryCalendar.Web.Pages
 {
     public class IndexModel : PageModel
     {
+        private readonly BookingDbContext _db;
+
+        public IndexModel(BookingDbContext db)
+        {
+            _db = db;
+        }
+
         [BindProperty(SupportsGet = true)]
         public string? Date { get; set; }
 
@@ -55,7 +64,7 @@ namespace HungryCalendar.Web.Pages
             GenerateSlots();
         }
 
-        public IActionResult OnPostConfirm()
+        public async Task<IActionResult> OnPostConfirm()
         {
             if (!ModelState.IsValid)
             {
@@ -63,8 +72,11 @@ namespace HungryCalendar.Web.Pages
                 return Page();
             }
 
-            // Mock logic: Prevent booking if Name is "Error"
-            if (Name?.ToLower() == "error")
+            // Persistence check
+            bool isTaken = await _db.Reservations.AnyAsync(r => r.Date == Date && r.Time == SelectedTime);
+            bool isDisabled = await _db.DisabledSlots.AnyAsync(d => d.Date == Date && d.Time == SelectedTime);
+
+            if (isTaken || isDisabled)
             {
                 ErrorMessage = "This time is no longer available. Please select another.";
                 SelectedTime = null;
@@ -72,6 +84,17 @@ namespace HungryCalendar.Web.Pages
                 return Page();
             }
 
+            _db.Reservations.Add(new DbReservation
+            {
+                Date = Date!,
+                Time = SelectedTime!,
+                Name = Name!,
+                Email = Email!,
+                Phone = Phone!,
+                GroupSize = GroupSize
+            });
+
+            await _db.SaveChangesAsync();
             BookingSuccess = true;
             return Page();
         }
@@ -88,7 +111,9 @@ namespace HungryCalendar.Web.Pages
             LunchSlots.Clear();
             AfternoonSlots.Clear();
 
-            // Simulation: No slots for large groups on specific dates
+            var reservations = _db.Reservations.Where(r => r.Date == Date).Select(r => r.Time).ToList();
+            var disabled = _db.DisabledSlots.Where(d => d.Date == Date).Select(d => d.Time).ToList();
+
             if (GroupSize > 8 && Date == "2026-12-24")
             {
                 InfoMessage = "No available times for the selected date and group size.";
@@ -97,12 +122,11 @@ namespace HungryCalendar.Web.Pages
 
             for (int hour = 11; hour < 22; hour++)
             {
-                for (int min = 0; min < 60; min += 30)
+                for (int min = 0; min < 60; min += 15)
                 {
                     string time = $"{hour:D2}:{min:D2}";
                     
-                    // Mock Some reserved slots
-                    if (IsReserved(time)) continue;
+                    if (reservations.Contains(time) || disabled.Contains(time)) continue;
 
                     if (hour < SeparationHour)
                     {
@@ -114,13 +138,6 @@ namespace HungryCalendar.Web.Pages
                     }
                 }
             }
-        }
-
-        private bool IsReserved(string time)
-        {
-            // Simple deterministic mock
-            int hash = (Date?.GetHashCode() ?? 0) ^ time.GetHashCode();
-            return (hash % 7 == 0);
         }
     }
 }

@@ -12,8 +12,12 @@
 <body>
     <div id="app">
         <header>
-            <nav class="container">
+            <nav class="container d-flex justify-content-between align-items-center">
                 <div class="logo">Hungry<span>Calendar</span></div>
+                <div class="nav-links">
+                    <a asp-page="/Index" style="color: var(--text-muted); text-decoration: none; margin-right: 1.5rem; font-size: 0.9rem;">Reservations</a>
+                    <a asp-page="/Admin" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">Admin View</a>
+                </div>
             </nav>
         </header>
 
