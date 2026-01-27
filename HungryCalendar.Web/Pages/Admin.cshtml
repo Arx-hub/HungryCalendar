@@ -77,7 +77,11 @@
                                         <td style="border-radius: 0 12px 12px 0;">
                                             <form method="post" asp-page-handler="DeleteReservation" asp-route-id="@res.Id">
                                                 <input type="hidden" name="Date" value="@Model.Date" />
-                                                <button type="submit" class="btn-link" style="color: var(--error); background: none; border: none; cursor: pointer;">Remove</button>
+                                                <button type="submit" class="btn-link" 
+                                                        style="color: var(--error); background: none; border: none; cursor: pointer;"
+                                                        onclick="return confirm('Are you sure you want to delete this reservation for @res.Name at @res.Time?')">
+                                                    Remove
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>
@@ -110,7 +114,8 @@
                                     <input type="hidden" name="Date" value="@Model.Date" />
                                     <button type="submit" class="time-slot @(isDisabled ? "reserved" : (res != null ? "selected" : "available"))" 
                                             style="width: 100%; font-size: 0.8rem; padding: 0.5rem; @(isDisabled ? "border-color: var(--error); color: var(--error);" : "")"
-                                            title="@(res != null ? $"Reserved by {res.Name}" : "")">
+                                            title="@(res != null ? $"Reserved by {res.Name}" : "")"
+                                            onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
                                         @t @(res != null ? " (R)" : "")
                                     </button>
                                 </form>
@@ -129,7 +134,8 @@
                                     <input type="hidden" name="Date" value="@Model.Date" />
                                     <button type="submit" class="time-slot @(isDisabled ? "reserved" : (res != null ? "selected" : "available"))" 
                                             style="width: 100%; font-size: 0.8rem; padding: 0.5rem; @(isDisabled ? "border-color: var(--error); color: var(--error);" : "")"
-                                            title="@(res != null ? $"Reserved by {res.Name}" : "")">
+                                            title="@(res != null ? $"Reserved by {res.Name}" : "")"
+                                            onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
                                         @t @(res != null ? " (R)" : "")
                                     </button>
                                 </form>

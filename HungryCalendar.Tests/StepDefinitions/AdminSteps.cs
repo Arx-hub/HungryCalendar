@@ -60,6 +60,8 @@ namespace HungryCalendar.Tests.StepDefinitions
         public async Task WhenTheAdministratorDisablesASpecificTimeSlot()
         {
             await Page.GotoAsync("http://localhost:5000/Admin");
+            // Handle the confirmation dialog
+            Page.Dialog += (_, dialog) => dialog.AcceptAsync();
             // Click the first available slot to toggle it to disabled
             await Page.ClickAsync(".time-slot.available >> nth=0");
         }
@@ -116,6 +118,8 @@ namespace HungryCalendar.Tests.StepDefinitions
                 await Page.GotoAsync("http://localhost:5000/Admin");
                 removeButton = Page.Locator("button:has-text('Remove')").First;
             }
+            // Handle the confirmation dialog
+            Page.Dialog += (_, dialog) => dialog.AcceptAsync();
             await removeButton.ClickAsync();
         }
 
@@ -143,6 +147,8 @@ namespace HungryCalendar.Tests.StepDefinitions
         [When("the administrator clicks on the disabled time slot")]
         public async Task WhenTheAdministratorClicksOnTheDisabledTimeSlot()
         {
+            // Handle the confirmation dialog
+            Page.Dialog += (_, dialog) => dialog.AcceptAsync();
             await Page.ClickAsync(".time-slot.reserved >> nth=0");
         }
     }
