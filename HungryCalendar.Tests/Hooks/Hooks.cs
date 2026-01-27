@@ -6,19 +6,20 @@ namespace HungryCalendar.Tests.Hooks
     [Binding]
     public class Hooks
     {
-        public static IPlaywright? Playwright;
-        public static IBrowser? Browser;
-        public static IPage? Page;
+        private static IPlaywright? _playwright;
+        private static IBrowser? _browser;
+        private readonly PlaywrightContext _context;
+
+        public Hooks(PlaywrightContext context)
+        {
+            _context = context;
+        }
 
         [BeforeTestRun]
         public static async Task BeforeTestRun()
         {
-            // Initialize Playwright
-            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
-            
-            // Launch the browser (headless by default). 
-            // Set Headless = false to see the browser UI during debugging.
-            Browser = await Playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+            _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
             {
                 Headless = true 
             });
@@ -27,33 +28,34 @@ namespace HungryCalendar.Tests.Hooks
         [BeforeScenario]
         public async Task BeforeScenario()
         {
-            // Create a new context and page for each scenario to ensure isolation
-            if (Browser != null)
+            if (_browser != null)
             {
-                var context = await Browser.NewContextAsync();
-                Page = await context.NewPageAsync();
+                _context.Context = await _browser.NewContextAsync();
+                _context.Page = await _context.Context.NewPageAsync();
             }
         }
 
         [AfterScenario]
         public async Task AfterScenario()
         {
-            // Close the page after each scenario
-            if (Page != null)
+            if (_context.Page != null)
             {
-                await Page.CloseAsync();
+                await _context.Page.CloseAsync();
+            }
+            if (_context.Context != null)
+            {
+                await _context.Context.CloseAsync();
             }
         }
 
         [AfterTestRun]
         public static async Task AfterTestRun()
         {
-            // Cleanup
-            if (Browser != null)
+            if (_browser != null)
             {
-                await Browser.CloseAsync();
+                await _browser.CloseAsync();
             }
-            Playwright?.Dispose();
+            _playwright?.Dispose();
         }
     }
 }
