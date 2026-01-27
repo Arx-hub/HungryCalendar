@@ -165,10 +165,10 @@ main {
   display: block;
 }
 
-.time-slot:hover:not(.reserved) {
+.time-slot:hover:not(:disabled) {
   background: var(--primary);
   color: white;
-  transform: translateY(-2px);
+  transform: scale(1.05) translateY(-2px);
   box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
 }
 
@@ -176,7 +176,6 @@ main {
   background: var(--primary) !important;
   color: white !important;
   border-color: var(--primary) !important;
-  transform: scale(1.05);
   box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
 }
 
@@ -189,9 +188,8 @@ main {
 .time-slot.reserved {
   background: rgba(255, 255, 255, 0.02);
   color: rgba(255, 255, 255, 0.1);
-  cursor: not-allowed;
+  cursor: pointer;
   border-style: dashed;
-  pointer-events: none;
 }
 
 .calendar-container.form-view {

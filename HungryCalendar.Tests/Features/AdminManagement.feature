@@ -25,3 +25,9 @@ Feature: Admin Management
     When the administrator selects a reservation and deletes it
     Then the reservation is removed from the calendar
     And the time slot becomes available again
+
+  Scenario: Administrator re-enables a disabled time slot
+    Given the administrator is logged into the reservation system
+    And the administrator has disabled a specific time slot
+    When the administrator clicks on the disabled time slot
+    Then the time slot becomes available again

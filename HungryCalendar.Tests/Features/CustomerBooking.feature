@@ -1,4 +1,4 @@
-#Feature: Customer Booking
+Feature: Customer Booking
   As a customer
   I want to be able to reserve a certain sized table at a certain time
   So that I can have dinner at the restaurant

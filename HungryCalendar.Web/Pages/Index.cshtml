@@ -142,7 +142,7 @@ else
                             </div>
                             <div class="input-group full-width">
                                 <label asp-for="Phone">Phone Number</label>
-                                <input asp-for="Phone" id="phone" placeholder="+358 40 123 4567" />
+                                <input asp-for="Phone" id="phone" placeholder="+358 40 123 4567" pattern="[0-9+ \-]+" title="Please enter a valid phone number" />
                                 <span asp-validation-for="Phone" class="text-danger"></span>
                             </div>
                         </div>
