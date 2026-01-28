@@ -17,6 +17,9 @@ namespace HungryCalendar.Web.Pages
         [BindProperty(SupportsGet = true)]
         public string? Date { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchQuery { get; set; }
+
         [BindProperty]
         public string? SelectedTime { get; set; }
 
@@ -96,7 +99,16 @@ namespace HungryCalendar.Web.Pages
         {
             LunchSlots.Clear();
             AfternoonSlots.Clear();
-            DateReservations = await _db.Reservations.Where(r => r.Date == Date).ToListAsync();
+            
+            var query = _db.Reservations.Where(r => r.Date == Date);
+            if (!string.IsNullOrEmpty(SearchQuery))
+            {
+                query = query.Where(r => r.Name.Contains(SearchQuery) || 
+                                         r.Email.Contains(SearchQuery) || 
+                                         r.Phone.Contains(SearchQuery));
+            }
+            DateReservations = await query.ToListAsync();
+            
             DisabledTimes = await _db.DisabledSlots.Where(d => d.Date == Date).Select(d => d.Time).ToListAsync();
 
             for (int hour = 11; hour < 22; hour++)

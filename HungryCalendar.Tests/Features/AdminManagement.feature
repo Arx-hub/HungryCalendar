@@ -31,3 +31,10 @@ Feature: Admin Management
     And the administrator has disabled a specific time slot
     When the administrator clicks on the disabled time slot
     Then the time slot becomes available again
+
+  Scenario: Administrator searches for a reservation
+    Given the administrator is logged into the reservation system
+    And there are reservations for "John unique_search_test", "Jane Smith", and "Bob Wilson"
+    When the administrator searches for "unique_search_test"
+    Then only the reservation for "John unique_search_test" is displayed
+    And the reservations for "Jane Smith" and "Bob Wilson" are not displayed
