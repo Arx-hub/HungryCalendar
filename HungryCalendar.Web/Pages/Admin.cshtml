@@ -47,11 +47,11 @@
                     <input type="date" name="Date" value="@Model.Date" class="form-control date-input" onchange="this.form.submit()">
                 </form>
 
-                <form method="get" class="search-form d-flex align-items-center">
+                <form method="get" class="search-form d-flex align-items-center" id="searchForm">
                     <input type="hidden" name="Date" value="@Model.Date" />
                     <div class="search-input-wrapper">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" placeholder="Search name, phone, email..." class="form-control search-input" />
+                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" placeholder="Search name, phone, email..." class="form-control search-input" id="searchInput" />
                     </div>
                 </form>
 
@@ -388,3 +388,19 @@
         white-space: nowrap;
     }
 </style>
+
+<script>
+    // Debounced search - submit form after user stops typing for 500ms
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    
+    if (searchInput && searchForm) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                searchForm.submit();
+            }, 500);
+        });
+    }
+</script>

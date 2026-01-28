@@ -158,7 +158,8 @@ namespace HungryCalendar.Web.Pages
                                          r.Email.ToLower().Contains(searchQueryLower) || 
                                          r.Phone.ToLower().Contains(searchQueryLower));
             }
-            DateReservations = await query.ToListAsync();
+            // Sort reservations by time in chronological order
+            DateReservations = await query.OrderBy(r => r.Time).ToListAsync();
             
             DisabledTimes = await _db.DisabledSlots.Where(d => d.Date == Date).Select(d => d.Time).ToListAsync();
             
