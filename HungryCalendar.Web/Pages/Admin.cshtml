@@ -40,7 +40,13 @@
                 <p class="text-muted mb-0">Managing reservations for <strong>@Model.Date</strong></p>
             </div>
             
-            <div class="d-flex flex-wrap align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-center gap-3 w-100 justify-content-end">
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                    <label class="text-muted small text-uppercase fw-bold">Date:</label>
+                    <input type="date" name="Date" value="@Model.Date" class="form-control date-input" onchange="this.form.submit()">
+                </form>
+
                 <form method="get" class="search-form d-flex align-items-center">
                     <input type="hidden" name="Date" value="@Model.Date" />
                     <div class="search-input-wrapper">
@@ -49,16 +55,9 @@
                     </div>
                 </form>
 
-                <div class="d-flex align-items-center gap-2">
-                    <form method="get" class="d-flex align-items-center gap-2">
-                        <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
-                        <label class="text-muted small text-uppercase fw-bold">Date:</label>
-                        <input type="date" name="Date" value="@Model.Date" class="form-control date-input" onchange="this.form.submit()">
-                    </form>
-                    <form method="post" asp-page-handler="Logout">
-                        <button type="submit" class="btn-secondary logout-btn">Logout</button>
-                    </form>
-                </div>
+                <form method="post" asp-page-handler="Logout">
+                    <button type="submit" class="btn-secondary logout-btn">Logout</button>
+                </form>
             </div>
         </div>
 
@@ -113,7 +112,20 @@
 
             <div class="col-lg-4">
                 <div class="dashboard-section timeline-section">
-                    <h3>Timeline Control</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="mb-0">Timeline Control</h3>
+                        <div class="block-day-checkbox-wrapper">
+                            <form method="post" asp-page-handler="ToggleBlockWholeDay" style="display: inline;">
+                                <input type="hidden" name="Date" value="@Model.Date" />
+                                <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                                <input type="checkbox" id="blockWholeDay" name="BlockWholeDay" 
+                                       @(Model.IsWholeDayBlocked ? "checked" : "") 
+                                       onchange="this.form.submit()"
+                                       class="form-check-input" />
+                                <label for="blockWholeDay" class="form-check-label">Block all times</label>
+                            </form>
+                        </div>
+                    </div>
                     <p class="text-muted small mb-4">Block slots to prevent customer bookings</p>
                     
                     <div class="time-block mb-4">
@@ -347,4 +359,32 @@
     }
 
     h3 { font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; color: var(--primary); }
+
+    .block-day-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .block-day-checkbox-wrapper .form-check-input {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--glass-border);
+        border-radius: 4px;
+        cursor: pointer;
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .block-day-checkbox-wrapper .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .block-day-checkbox-wrapper .form-check-label {
+        margin-bottom: 0;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
 </style>

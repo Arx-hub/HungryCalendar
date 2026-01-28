@@ -106,7 +106,7 @@ namespace HungryCalendar.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/AdminManagement.feature.ndjson", 8);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/AdminManagement.feature.ndjson", 10);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -352,6 +352,89 @@ namespace HungryCalendar.Tests.Features
 #line hidden
 #line 40
     await testRunner.AndAsync("the reservations for \"Jane Smith\" and \"Bob Wilson\" are not displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Administrator blocks entire day to prevent all reservations")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Admin Management")]
+        [global::Xunit.TraitAttribute("Description", "Administrator blocks entire day to prevent all reservations")]
+        public async global::System.Threading.Tasks.Task AdministratorBlocksEntireDayToPreventAllReservations()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "6";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator blocks entire day to prevent all reservations", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 42
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 43
+    await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 44
+    await testRunner.AndAsync("the administrator navigates to a future date", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 45
+    await testRunner.WhenAsync("the administrator clicks the \"Block all times\" checkbox", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 46
+    await testRunner.ThenAsync("all time slots for that day become unavailable to customers", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 47
+    await testRunner.AndAsync("the \"Block all times\" checkbox remains checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Administrator unblocks an entire day to allow reservations again")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Admin Management")]
+        [global::Xunit.TraitAttribute("Description", "Administrator unblocks an entire day to allow reservations again")]
+        public async global::System.Threading.Tasks.Task AdministratorUnblocksAnEntireDayToAllowReservationsAgain()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator unblocks an entire day to allow reservations again", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 49
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 50
+    await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 51
+    await testRunner.AndAsync("the administrator navigates to a future date", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 52
+    await testRunner.AndAsync("the administrator has blocked the entire day by checking \"Block all times\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 53
+    await testRunner.WhenAsync("the administrator unchecks the \"Block all times\" checkbox", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 54
+    await testRunner.ThenAsync("all time slots for that day become available again", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 55
+    await testRunner.AndAsync("the \"Block all times\" checkbox is no longer checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

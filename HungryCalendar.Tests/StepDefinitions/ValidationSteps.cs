@@ -18,7 +18,9 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("the customer is filling up the contact information")]
         public async Task GivenTheCustomerIsFillingUpTheContactInformation()
         {
-            await Page.GotoAsync("http://localhost:5000/");
+            // Navigate to tomorrow to avoid conflicts with same-day tests
+            var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
             // Select a time just to get to the form
             await Page.ClickAsync(".time-slot.available >> nth=0");
         }

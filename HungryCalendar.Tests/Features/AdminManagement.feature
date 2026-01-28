@@ -38,3 +38,18 @@ Feature: Admin Management
     When the administrator searches for "unique_search_test"
     Then only the reservation for "John unique_search_test" is displayed
     And the reservations for "Jane Smith" and "Bob Wilson" are not displayed
+
+  Scenario: Administrator blocks entire day to prevent all reservations
+    Given the administrator is logged into the reservation system
+    And the administrator navigates to a future date
+    When the administrator clicks the "Block all times" checkbox
+    Then all time slots for that day become unavailable to customers
+    And the "Block all times" checkbox remains checked
+    
+  Scenario: Administrator unblocks an entire day to allow reservations again
+    Given the administrator is logged into the reservation system
+    And the administrator navigates to a future date
+    And the administrator has blocked the entire day by checking "Block all times"
+    When the administrator unchecks the "Block all times" checkbox
+    Then all time slots for that day become available again
+    And the "Block all times" checkbox is no longer checked

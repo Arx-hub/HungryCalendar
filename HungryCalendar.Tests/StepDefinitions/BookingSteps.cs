@@ -19,7 +19,9 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("the customer has selected an available reservation time")]
         public async Task GivenTheCustomerHasSelectedAnAvailableTime()
         {
-            await Page.GotoAsync("http://localhost:5000/"); 
+            // Navigate to tomorrow to avoid conflicts with same-day tests
+            var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}"); 
             // Select the first available time slot
             await Page.ClickAsync(".time-slot.available >> nth=0");
             await Page.WaitForSelectorAsync("#reservation-form");
@@ -110,7 +112,9 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("a customer has selected a reservation time")]
         public async Task GivenACustomerHasSelectedAReservationTime()
         {
-            await Page.GotoAsync("http://localhost:5000/");
+            // Navigate to tomorrow to avoid conflicts with same-day tests
+            var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
             await Page.ClickAsync(".time-slot.available >> nth=0");
         }
 
@@ -131,7 +135,9 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("the customer is making a reservation")]
         public async Task GivenTheCustomerIsMakingAReservation()
         {
-             await Page.GotoAsync("http://localhost:5000/");
+             // Navigate to tomorrow to avoid conflicts with same-day tests
+             var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+             await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
              // Set guests first to ensure they are preserved
              await Page.SelectOptionAsync("#group-size", "2");
              // Then select an available time
