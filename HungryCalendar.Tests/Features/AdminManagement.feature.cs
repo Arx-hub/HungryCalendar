@@ -106,7 +106,7 @@ namespace HungryCalendar.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/AdminManagement.feature.ndjson", 10);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/AdminManagement.feature.ndjson", 13);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -435,6 +435,192 @@ namespace HungryCalendar.Tests.Features
 #line hidden
 #line 55
     await testRunner.AndAsync("the \"Block all times\" checkbox is no longer checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Administrator blocks selected time slots")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Admin Management")]
+        [global::Xunit.TraitAttribute("Description", "Administrator blocks selected time slots")]
+        public async global::System.Threading.Tasks.Task AdministratorBlocksSelectedTimeSlots()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator blocks selected time slots", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 57
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 58
+    await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 59
+    await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 60
+    await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 61
+    await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
+                        "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 62
+    await testRunner.WhenAsync("the administrator selects at least one time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 63
+    await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 64
+    await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 65
+    await testRunner.WhenAsync("the administrator clicks the \"Block Selected Times\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 66
+    await testRunner.ThenAsync("the selected time slots become blocked", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 67
+    await testRunner.AndAsync("the blocked time slots are unavailable for customers to select", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 68
+    await testRunner.AndAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 69
+    await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Administrator unblocks selected time slots")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Admin Management")]
+        [global::Xunit.TraitAttribute("Description", "Administrator unblocks selected time slots")]
+        public async global::System.Threading.Tasks.Task AdministratorUnblocksSelectedTimeSlots()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator unblocks selected time slots", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 71
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 72
+    await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 73
+    await testRunner.AndAsync("there are some blocked time slots", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 74
+    await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 75
+    await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 76
+    await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
+                        "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 77
+    await testRunner.WhenAsync("the administrator selects at least one blocked time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 78
+    await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 79
+    await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 80
+    await testRunner.WhenAsync("the administrator clicks the \"Unblock Selected Times\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 81
+    await testRunner.ThenAsync("the selected time slots become unblocked", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 82
+    await testRunner.AndAsync("the unblocked time slots are available for customers to select", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 83
+    await testRunner.AndAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 84
+    await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Administrator cancels time slot selection")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Admin Management")]
+        [global::Xunit.TraitAttribute("Description", "Administrator cancels time slot selection")]
+        public async global::System.Threading.Tasks.Task AdministratorCancelsTimeSlotSelection()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator cancels time slot selection", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 86
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 87
+    await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 88
+    await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 89
+    await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 90
+    await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
+                        "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 91
+    await testRunner.WhenAsync("the administrator selects at least one time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 92
+    await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 93
+    await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 94
+    await testRunner.WhenAsync("the administrator clicks the \"Cancel Selection\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 95
+    await testRunner.ThenAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 96
+    await testRunner.AndAsync("no time slots are selected", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 97
+    await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

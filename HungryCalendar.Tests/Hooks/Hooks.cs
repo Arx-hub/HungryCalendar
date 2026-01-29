@@ -23,11 +23,16 @@ namespace HungryCalendar.Tests.Hooks
         public static async Task BeforeTestRun()
         {
             // Start the web server
+            // AppContext.BaseDirectory is the bin\Debug\net9.0 directory
+            // We need to go up to the solution root
+            var solutionRoot = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..");
+            var fullSolutionRoot = Path.GetFullPath(solutionRoot);
+            
             var processInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = "run --project ../HungryCalendar.Web/HungryCalendar.Web.csproj",
-                WorkingDirectory = Path.Combine(AppContext.BaseDirectory, ".."),
+                Arguments = "run --project HungryCalendar.Web --no-build",
+                WorkingDirectory = fullSolutionRoot,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -36,8 +41,8 @@ namespace HungryCalendar.Tests.Hooks
 
             _serverProcess = Process.Start(processInfo);
             
-            // Wait for the server to be ready
-            await Task.Delay(3000);
+            // Wait for the server to be ready - increased timeout to ensure server starts
+            await Task.Delay(10000);
             
             _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
             _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions

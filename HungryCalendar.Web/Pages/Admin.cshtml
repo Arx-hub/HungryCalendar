@@ -114,58 +114,84 @@
                 <div class="dashboard-section timeline-section">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="mb-0">Timeline Control</h3>
-                        <div class="block-day-checkbox-wrapper">
-                            <form method="post" asp-page-handler="ToggleBlockWholeDay" style="display: inline;">
-                                <input type="hidden" name="Date" value="@Model.Date" />
-                                <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
-                                <input type="checkbox" id="blockWholeDay" name="BlockWholeDay" 
-                                       @(Model.IsWholeDayBlocked ? "checked" : "") 
-                                       onchange="this.form.submit()"
-                                       class="form-check-input" />
-                                <label for="blockWholeDay" class="form-check-label">Block all times</label>
-                            </form>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" id="selectionModeBtn" class="btn-secondary" onclick="enterSelectionMode()" title="Select multiple reservations at once">
+                                <i class="fas fa-check-square me-1"></i> Select Multiple
+                            </button>
+                            <div class="block-day-checkbox-wrapper">
+                                <form method="post" asp-page-handler="ToggleBlockWholeDay" style="display: inline;">
+                                    <input type="hidden" name="Date" value="@Model.Date" />
+                                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                                    <input type="checkbox" id="blockWholeDay" name="BlockWholeDay" 
+                                           @(Model.IsWholeDayBlocked ? "checked" : "") 
+                                           onchange="this.form.submit()"
+                                           class="form-check-input" />
+                                    <label for="blockWholeDay" class="form-check-label">Block all times</label>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     <p class="text-muted small mb-4">Block slots to prevent customer bookings</p>
                     
-                    <div class="time-block mb-4">
+                    <div class="time-block mb-4" id="lunchServicesBlock">
                         <h4 class="section-subtitle">Lunch Service</h4>
-                        <div class="time-grid-admin">
+                        <div class="time-grid-admin" id="lunchTimeSlots">
                             @foreach (var t in Model.LunchSlots)
                             {
                                 var res = Model.DateReservations.FirstOrDefault(r => r.Time == t);
                                 bool isDisabled = Model.DisabledTimes.Contains(t);
-                                <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
-                                    <input type="hidden" name="Date" value="@Model.Date" />
-                                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
-                                    <button type="submit" class="admin-time-slot @(isDisabled ? "is-blocked" : (res != null ? "is-reserved" : "is-available"))" 
-                                            title="@(res != null ? $"Reserved by {res.Name}" : (isDisabled ? "Blocked" : "Available"))"
-                                            onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
-                                        @t @(res != null ? " (R)" : "")
-                                    </button>
-                                </form>
+                                <div class="time-slot-wrapper" data-time="@t">
+                                    <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
+                                        <input type="hidden" name="Date" value="@Model.Date" />
+                                        <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                                        <button type="submit" class="admin-time-slot @(isDisabled ? "is-blocked" : (res != null ? "is-reserved" : "is-available"))" 
+                                                title="@(res != null ? $"Reserved by {res.Name}" : (isDisabled ? "Blocked" : "Available"))"
+                                                onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
+                                            <input type="checkbox" class="time-slot-checkbox" data-time="@t" style="display: none;" />
+                                            <span class="checkbox-display" style="display: none; margin-right: 8px;"></span>
+                                            @t @(res != null ? " (R)" : "")
+                                        </button>
+                                    </form>
+                                </div>
                             }
                         </div>
                     </div>
 
-                    <div class="time-block">
+                    <div class="time-block" id="afternoonServicesBlock">
                         <h4 class="section-subtitle">Afternoon & Dinner</h4>
-                        <div class="time-grid-admin">
+                        <div class="time-grid-admin" id="afternoonTimeSlots">
                             @foreach (var t in Model.AfternoonSlots)
                             {
                                 var res = Model.DateReservations.FirstOrDefault(r => r.Time == t);
                                 bool isDisabled = Model.DisabledTimes.Contains(t);
-                                <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
-                                    <input type="hidden" name="Date" value="@Model.Date" />
-                                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
-                                    <button type="submit" class="admin-time-slot @(isDisabled ? "is-blocked" : (res != null ? "is-reserved" : "is-available"))" 
-                                            title="@(res != null ? $"Reserved by {res.Name}" : (isDisabled ? "Blocked" : "Available"))"
-                                            onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
-                                        @t @(res != null ? " (R)" : "")
-                                    </button>
-                                </form>
+                                <div class="time-slot-wrapper" data-time="@t">
+                                    <form method="post" asp-page-handler="ToggleSlot" asp-route-time="@t">
+                                        <input type="hidden" name="Date" value="@Model.Date" />
+                                        <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                                        <button type="submit" class="admin-time-slot @(isDisabled ? "is-blocked" : (res != null ? "is-reserved" : "is-available"))" 
+                                                title="@(res != null ? $"Reserved by {res.Name}" : (isDisabled ? "Blocked" : "Available"))"
+                                                onclick="return confirm('@(isDisabled ? $"Make {t} available again?" : $"Block {t} for all customers?")')">
+                                            <input type="checkbox" class="time-slot-checkbox" data-time="@t" style="display: none;" />
+                                            <span class="checkbox-display" style="display: none; margin-right: 8px;"></span>
+                                            @t @(res != null ? " (R)" : "")
+                                        </button>
+                                    </form>
+                                </div>
                             }
                         </div>
+                    </div>
+
+                    <!-- Batch action buttons for time slots - hidden by default -->
+                    <div class="batch-actions-timeSlots" id="batchActionsTimeSlots" style="display: none; margin-top: 2rem; gap: 1rem;">
+                        <button class="btn-delete" id="batchBlockTimeSlotsBtn" onclick="batchBlockTimeSlots()">
+                            <i class="fas fa-lock me-1"></i> Block Selected Times
+                        </button>
+                        <button class="btn-delete" id="batchUnblockTimeSlotsBtn" onclick="batchUnblockTimeSlots()">
+                            <i class="fas fa-unlock me-1"></i> Unblock Selected Times
+                        </button>
+                        <button class="btn-secondary" id="cancelTimeSlotSelectionBtn" onclick="exitTimeSlotSelectionMode()">
+                            <i class="fas fa-times me-1"></i> Cancel Selection
+                        </button>
                     </div>
                 </div>
             </div>
@@ -387,20 +413,258 @@
         font-weight: 500;
         white-space: nowrap;
     }
+
+    /* Selection Mode Styles for Time Slots */
+    .time-slot-wrapper {
+        position: relative;
+    }
+
+    .time-slot-wrapper.selected .admin-time-slot {
+        background: rgba(96, 165, 250, 0.3);
+        border-color: var(--primary);
+        transform: scale(1.05);
+    }
+
+    .admin-time-slot {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkbox-display {
+        display: none !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        background: rgba(96, 165, 250, 0.4);
+        border: 2px solid rgba(96, 165, 250, 0.7);
+        border-radius: 4px;
+        color: rgba(96, 165, 250, 0.9);
+        font-size: 14px;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .time-slot-wrapper.selected .checkbox-display {
+        background: rgba(96, 165, 250, 0.6);
+        border-color: var(--primary);
+    }
+
+    .time-slot-wrapper .time-slot-checkbox {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .batch-actions-timeSlots {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .batch-actions-timeSlots button {
+        flex: 1;
+        min-width: 150px;
+    }
 </style>
 
 <script>
-    // Debounced search - submit form after user stops typing for 500ms
-    let searchTimeout;
+    let isSelectionMode = false;
+    const selectedTimeSlots = new Set();
+
+    function enterSelectionMode() {
+        isSelectionMode = true;
+        const selectionBtn = document.getElementById('selectionModeBtn');
+        const batchActions = document.getElementById('batchActionsTimeSlots');
+
+        // Show all checkboxes and their display spans
+        document.querySelectorAll('.time-slot-checkbox').forEach(checkbox => {
+            checkbox.style.display = 'none'; // Keep actual checkbox hidden
+            const display = checkbox.parentElement.querySelector('.checkbox-display');
+            if (display) {
+                display.style.display = 'flex';
+                display.innerHTML = '☐';
+            }
+        });
+
+        // Show batch action buttons
+        batchActions.style.display = 'flex';
+        selectionBtn.disabled = true;
+        selectionBtn.style.opacity = '0.5';
+
+        // Add click handlers to time slot wrappers
+        const wrappers = document.querySelectorAll('.time-slot-wrapper');
+        wrappers.forEach(wrapper => {
+            wrapper.addEventListener('click', toggleTimeSlotSelection);
+        });
+    }
+
+    function exitTimeSlotSelectionMode() {
+        isSelectionMode = false;
+        selectedTimeSlots.clear();
+        const batchActions = document.getElementById('batchActionsTimeSlots');
+        const selectionBtn = document.getElementById('selectionModeBtn');
+
+        // Hide all checkboxes and their display spans
+        document.querySelectorAll('.time-slot-checkbox').forEach(checkbox => {
+            checkbox.style.display = 'none';
+            checkbox.checked = false;
+            const display = checkbox.parentElement.querySelector('.checkbox-display');
+            if (display) {
+                display.style.display = 'none';
+                display.innerHTML = '☐';
+            }
+        });
+
+        // Hide batch action buttons
+        batchActions.style.display = 'none';
+        selectionBtn.disabled = false;
+        selectionBtn.style.opacity = '1';
+
+        // Remove selected class and click handlers
+        const wrappers = document.querySelectorAll('.time-slot-wrapper');
+        wrappers.forEach(wrapper => {
+            wrapper.classList.remove('selected');
+            wrapper.removeEventListener('click', toggleTimeSlotSelection);
+        });
+    }
+
+    function toggleTimeSlotSelection(event) {
+        if (!isSelectionMode) return;
+        
+        const wrapper = event.currentTarget;
+        const time = wrapper.getAttribute('data-time');
+        const checkbox = wrapper.querySelector('.time-slot-checkbox');
+        const display = wrapper.querySelector('.checkbox-display');
+
+        if (selectedTimeSlots.has(time)) {
+            selectedTimeSlots.delete(time);
+            wrapper.classList.remove('selected');
+            checkbox.checked = false;
+            if (display) display.innerHTML = '☐';
+        } else {
+            selectedTimeSlots.add(time);
+            wrapper.classList.add('selected');
+            checkbox.checked = true;
+            if (display) display.innerHTML = '☑';
+        }
+    }
+    
+    // Handle form submission prevention in selection mode
+    document.addEventListener('submit', function(event) {
+        // Check if this form is within a time-slot-wrapper that's in selection mode
+        const wrapper = event.target.closest('.time-slot-wrapper');
+        if (wrapper && isSelectionMode) {
+            event.preventDefault();
+            const time = wrapper.getAttribute('data-time');
+            const checkbox = wrapper.querySelector('.time-slot-checkbox');
+            const display = wrapper.querySelector('.checkbox-display');
+            
+            if (selectedTimeSlots.has(time)) {
+                selectedTimeSlots.delete(time);
+                wrapper.classList.remove('selected');
+                checkbox.checked = false;
+                if (display) display.innerHTML = '☐';
+            } else {
+                selectedTimeSlots.add(time);
+                wrapper.classList.add('selected');
+                checkbox.checked = true;
+                if (display) display.innerHTML = '☑';
+            }
+        }
+    }, true); // Use capture phase to intercept before normal handling
+
+    async function batchBlockTimeSlots() {
+        if (selectedTimeSlots.size === 0) {
+            alert('Please select at least one time slot');
+            return;
+        }
+
+        const confirmed = confirm(`Block ${selectedTimeSlots.size} selected time slot(s)?`);
+        if (!confirmed) return;
+
+        // Get current date from URL or page
+        const params = new URLSearchParams(window.location.search);
+        const currentDate = params.get('Date') || new Date().toISOString().split('T')[0];
+        const searchQuery = params.get('SearchQuery') || '';
+
+        // Block each selected time slot
+        const promises = [];
+        for (const time of selectedTimeSlots) {
+            const formData = new URLSearchParams();
+            formData.append('time', time);
+            formData.append('Date', currentDate);
+            if (searchQuery) formData.append('SearchQuery', searchQuery);
+            
+            const promise = fetch(window.location.pathname + '?handler=ToggleSlot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            }).catch(error => console.error('Error blocking time slot:', error));
+            
+            promises.push(promise);
+        }
+        
+        // Wait for all requests to complete before reloading
+        await Promise.all(promises);
+        location.reload();
+    }
+
+    async function batchUnblockTimeSlots() {
+        if (selectedTimeSlots.size === 0) {
+            alert('Please select at least one time slot');
+            return;
+        }
+
+        const confirmed = confirm(`Unblock ${selectedTimeSlots.size} selected time slot(s)?`);
+        if (!confirmed) return;
+
+        // Get current date from URL or page
+        const params = new URLSearchParams(window.location.search);
+        const currentDate = params.get('Date') || new Date().toISOString().split('T')[0];
+        const searchQuery = params.get('SearchQuery') || '';
+
+        // Unblock each selected time slot
+        const promises = [];
+        for (const time of selectedTimeSlots) {
+            const formData = new URLSearchParams();
+            formData.append('time', time);
+            formData.append('Date', currentDate);
+            if (searchQuery) formData.append('SearchQuery', searchQuery);
+            
+            const promise = fetch(window.location.pathname + '?handler=ToggleSlot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            }).catch(error => console.error('Error unblocking time slot:', error));
+            
+            promises.push(promise);
+        }
+        
+        // Wait for all requests to complete before reloading
+        await Promise.all(promises);
+        location.reload();
+    }
+
+    // Search only on Enter key press
     const searchInput = document.getElementById('searchInput');
     const searchForm = document.getElementById('searchForm');
     
     if (searchInput && searchForm) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
                 searchForm.submit();
-            }, 500);
+            }
         });
     }
 </script>

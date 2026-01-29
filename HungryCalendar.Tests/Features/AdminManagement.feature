@@ -53,3 +53,45 @@ Feature: Admin Management
     When the administrator unchecks the "Block all times" checkbox
     Then all time slots for that day become available again
     And the "Block all times" checkbox is no longer checked
+
+  Scenario: Administrator blocks selected time slots
+    Given the administrator is logged into the reservation system
+    When the administrator clicks the "Select Multiple" button
+    Then each time slot displays a checkbox for selection
+    And the "Block Selected Times", "Unblock Selected Times", and "Cancel Selection" buttons are visible
+    When the administrator selects at least one time slot
+    Then the selected time slots are highlighted
+    And the checkboxes for selected time slots are checked
+    When the administrator clicks the "Block Selected Times" button
+    Then the selected time slots become blocked
+    And the blocked time slots are unavailable for customers to select
+    And the selection mode is exited
+    And the batch action buttons are no longer visible
+
+  Scenario: Administrator unblocks selected time slots
+    Given the administrator is logged into the reservation system
+    And there are some blocked time slots
+    When the administrator clicks the "Select Multiple" button
+    Then each time slot displays a checkbox for selection
+    And the "Block Selected Times", "Unblock Selected Times", and "Cancel Selection" buttons are visible
+    When the administrator selects at least one blocked time slot
+    Then the selected time slots are highlighted
+    And the checkboxes for selected time slots are checked
+    When the administrator clicks the "Unblock Selected Times" button
+    Then the selected time slots become unblocked
+    And the unblocked time slots are available for customers to select
+    And the selection mode is exited
+    And the batch action buttons are no longer visible
+
+  Scenario: Administrator cancels time slot selection
+    Given the administrator is logged into the reservation system
+    When the administrator clicks the "Select Multiple" button
+    Then each time slot displays a checkbox for selection
+    And the "Block Selected Times", "Unblock Selected Times", and "Cancel Selection" buttons are visible
+    When the administrator selects at least one time slot
+    Then the selected time slots are highlighted
+    And the checkboxes for selected time slots are checked
+    When the administrator clicks the "Cancel Selection" button
+    Then the selection mode is exited
+    And no time slots are selected
+    And the batch action buttons are no longer visible
