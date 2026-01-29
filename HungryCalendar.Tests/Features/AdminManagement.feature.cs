@@ -465,37 +465,40 @@ namespace HungryCalendar.Tests.Features
     await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 59
-    await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("the administrator navigates to a future date", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 60
-    await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 61
+    await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 62
     await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
                         "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 62
+#line 63
     await testRunner.WhenAsync("the administrator selects at least one time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 63
+#line 64
     await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 64
+#line 65
     await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 65
+#line 66
     await testRunner.WhenAsync("the administrator clicks the \"Block Selected Times\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 66
+#line 67
     await testRunner.ThenAsync("the selected time slots become blocked", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 67
+#line 68
     await testRunner.AndAsync("the blocked time slots are unavailable for customers to select", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 68
+#line 69
     await testRunner.AndAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 69
+#line 70
     await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -513,7 +516,7 @@ namespace HungryCalendar.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator unblocks selected time slots", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 71
+#line 72
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -523,44 +526,44 @@ namespace HungryCalendar.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 72
+#line 73
     await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 73
+#line 74
     await testRunner.AndAsync("there are some blocked time slots", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 74
+#line 75
     await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 75
+#line 76
     await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 76
+#line 77
     await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
                         "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 77
+#line 78
     await testRunner.WhenAsync("the administrator selects at least one blocked time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 78
+#line 79
     await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 79
+#line 80
     await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 80
+#line 81
     await testRunner.WhenAsync("the administrator clicks the \"Unblock Selected Times\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 81
+#line 82
     await testRunner.ThenAsync("the selected time slots become unblocked", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 82
+#line 83
     await testRunner.AndAsync("the unblocked time slots are available for customers to select", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 83
+#line 84
     await testRunner.AndAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 84
+#line 85
     await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -578,7 +581,7 @@ namespace HungryCalendar.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Administrator cancels time slot selection", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 86
+#line 87
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -588,38 +591,38 @@ namespace HungryCalendar.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 87
+#line 88
     await testRunner.GivenAsync("the administrator is logged into the reservation system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 88
+#line 89
     await testRunner.WhenAsync("the administrator clicks the \"Select Multiple\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 89
+#line 90
     await testRunner.ThenAsync("each time slot displays a checkbox for selection", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 90
+#line 91
     await testRunner.AndAsync("the \"Block Selected Times\", \"Unblock Selected Times\", and \"Cancel Selection\" butt" +
                         "ons are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 91
+#line 92
     await testRunner.WhenAsync("the administrator selects at least one time slot", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 92
+#line 93
     await testRunner.ThenAsync("the selected time slots are highlighted", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 93
+#line 94
     await testRunner.AndAsync("the checkboxes for selected time slots are checked", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 94
+#line 95
     await testRunner.WhenAsync("the administrator clicks the \"Cancel Selection\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 95
+#line 96
     await testRunner.ThenAsync("the selection mode is exited", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 96
+#line 97
     await testRunner.AndAsync("no time slots are selected", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 97
+#line 98
     await testRunner.AndAsync("the batch action buttons are no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

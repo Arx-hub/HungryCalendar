@@ -432,7 +432,7 @@
     }
 
     .checkbox-display {
-        display: none !important;
+        display: none;
         align-items: center;
         justify-content: center;
         min-width: 20px;
@@ -462,7 +462,7 @@
     }
 
     .batch-actions-timeSlots {
-        display: flex !important;
+        display: flex;
         flex-wrap: wrap;
         gap: 1rem;
     }
@@ -561,21 +561,6 @@
         const wrapper = event.target.closest('.time-slot-wrapper');
         if (wrapper && isSelectionMode) {
             event.preventDefault();
-            const time = wrapper.getAttribute('data-time');
-            const checkbox = wrapper.querySelector('.time-slot-checkbox');
-            const display = wrapper.querySelector('.checkbox-display');
-            
-            if (selectedTimeSlots.has(time)) {
-                selectedTimeSlots.delete(time);
-                wrapper.classList.remove('selected');
-                checkbox.checked = false;
-                if (display) display.innerHTML = '☐';
-            } else {
-                selectedTimeSlots.add(time);
-                wrapper.classList.add('selected');
-                checkbox.checked = true;
-                if (display) display.innerHTML = '☑';
-            }
         }
     }, true); // Use capture phase to intercept before normal handling
 
@@ -600,6 +585,9 @@
             formData.append('time', time);
             formData.append('Date', currentDate);
             if (searchQuery) formData.append('SearchQuery', searchQuery);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) formData.append('__RequestVerificationToken', token);
             
             const promise = fetch(window.location.pathname + '?handler=ToggleSlot', {
                 method: 'POST',
@@ -638,6 +626,9 @@
             formData.append('time', time);
             formData.append('Date', currentDate);
             if (searchQuery) formData.append('SearchQuery', searchQuery);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) formData.append('__RequestVerificationToken', token);
             
             const promise = fetch(window.location.pathname + '?handler=ToggleSlot', {
                 method: 'POST',

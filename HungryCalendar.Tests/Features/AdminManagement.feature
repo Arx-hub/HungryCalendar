@@ -56,6 +56,7 @@ Feature: Admin Management
 
   Scenario: Administrator blocks selected time slots
     Given the administrator is logged into the reservation system
+    And the administrator navigates to a future date
     When the administrator clicks the "Select Multiple" button
     Then each time slot displays a checkbox for selection
     And the "Block Selected Times", "Unblock Selected Times", and "Cancel Selection" buttons are visible

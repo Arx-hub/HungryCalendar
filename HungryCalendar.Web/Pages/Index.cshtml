@@ -82,6 +82,12 @@ else
                     @Model.InfoMessage
                 </div>
             }
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="error-message" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;">
+                    @Model.ErrorMessage
+                </div>
+            }
             else
             {
                 <div id="slots-container" class="calendar-container @(Model.ShowForm ? "form-view" : "")">

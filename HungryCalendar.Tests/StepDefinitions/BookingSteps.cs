@@ -1,6 +1,8 @@
 using Reqnroll;
 using FluentAssertions;
 using HungryCalendar.Tests.Hooks;
+using HungryCalendar.Web.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HungryCalendar.Tests.StepDefinitions
 {
@@ -10,20 +12,23 @@ namespace HungryCalendar.Tests.StepDefinitions
         private readonly PlaywrightContext _context;
         private Microsoft.Playwright.IPage Page => _context.Page!;
 
-        public BookingSteps(PlaywrightContext context)
+        private readonly ScenarioContext _scenarioContext;
+
+        public BookingSteps(PlaywrightContext context, ScenarioContext scenarioContext)
         {
             _context = context;
+            _scenarioContext = scenarioContext;
         }
 
         [Given("the customer has selected an available time")]
         [Given("the customer has selected an available reservation time")]
         public async Task GivenTheCustomerHasSelectedAnAvailableTime()
         {
-            // Navigate to tomorrow to avoid conflicts with same-day tests
-            var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
-            await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}"); 
+            // Navigate to 12 days in future to avoid conflicts with same-day tests
+            var futureDate = DateTime.Now.AddDays(12).ToString("yyyy-MM-dd");
+            await Page.GotoAsync($"http://localhost:5000/?Date={futureDate}"); 
             // Select the first available time slot
-            await Page.ClickAsync(".time-slot.available >> nth=0");
+            await Page.Locator(".time-slot.available").First.ClickAsync();
             await Page.WaitForSelectorAsync("#reservation-form");
         }
 
@@ -112,15 +117,44 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("a customer has selected a reservation time")]
         public async Task GivenACustomerHasSelectedAReservationTime()
         {
-            // Navigate to tomorrow to avoid conflicts with same-day tests
-            var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
-            await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
-            await Page.ClickAsync(".time-slot.available >> nth=0");
+            // Navigate to 13 days in future to avoid conflicts
+            var futureDate = DateTime.Now.AddDays(13).ToString("yyyy-MM-dd");
+            await Page.GotoAsync($"http://localhost:5000/?Date={futureDate}");
+            
+            var slot = Page.Locator(".time-slot.available").First;
+            var timeText = await slot.InnerTextAsync();
+            
+            // Store details for the conflict step
+            _scenarioContext["SelectedDate"] = futureDate;
+            _scenarioContext["SelectedTime"] = timeText.Trim(); // e.g. "11:00"
+            
+            await slot.ClickAsync();
         }
 
         [When("another customer confirms the same time first")]
         public async Task WhenAnotherCustomerConfirmsTheSameTimeFirst()
         {
+             // Simulate race condition by inserting a disability/reservation for this slot
+             // directly into the DB before the user submits.
+             
+             var date = _scenarioContext["SelectedDate"].ToString();
+             var time = _scenarioContext["SelectedTime"].ToString();
+
+             // Use the same database as the running web application
+             var dbPath = @"c:\Users\arxhe\VSCode\Github\School_Projects\Ohke2026\HungryCalendar\HungryCalendar.Web\hungrycalendar.db";
+             var options = new DbContextOptionsBuilder<BookingDbContext>()
+                .UseSqlite($"Data Source={dbPath}")
+                .Options;
+             
+             using (var db = new BookingDbContext(options))
+             {
+                 db.Database.EnsureCreated();
+                 // Create a conflict
+                 db.DisabledSlots.Add(new DbDisabledSlot { Date = date!, Time = time! });
+                 db.SaveChanges();
+             }
+
+             // Now the user submits, expecting failure
              await Page.ClickAsync("#submit-reservation");
         }
 
@@ -128,16 +162,15 @@ namespace HungryCalendar.Tests.StepDefinitions
         public async Task ThenTheSystemInformsTheCustomerThatTheTimeIsNoLongerAvailable()
         {
             var error = Page.Locator(".error-message");
-            // If the element doesn't exist yet, it's fine, we are just waiting for any error.
-            // But we can be more specific.
+            await Microsoft.Playwright.Assertions.Expect(error).ToContainTextAsync("no longer available");
         }
 
         [Given("the customer is making a reservation")]
         public async Task GivenTheCustomerIsMakingAReservation()
         {
-             // Navigate to tomorrow to avoid conflicts with same-day tests
-             var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
-             await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
+             // Navigate to 14 days in future
+             var futureDate = DateTime.Now.AddDays(14).ToString("yyyy-MM-dd");
+             await Page.GotoAsync($"http://localhost:5000/?Date={futureDate}");
              // Set guests first to ensure they are preserved
              await Page.SelectOptionAsync("#group-size", "2");
              // Then select an available time

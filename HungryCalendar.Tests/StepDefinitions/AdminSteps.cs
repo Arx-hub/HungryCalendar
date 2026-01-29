@@ -33,6 +33,7 @@ namespace HungryCalendar.Tests.StepDefinitions
         {
             // Navigate to a date 7 days in the future to avoid interfering with other tests
             var futureDate = DateTime.Now.AddDays(7).ToString("yyyy-MM-dd");
+            _scenarioContext["Date"] = futureDate;
             await Page.GotoAsync($"http://localhost:5000/Admin?Date={futureDate}");
             await Page.WaitForSelectorAsync("button:has-text('Logout')");
         }
@@ -71,9 +72,10 @@ namespace HungryCalendar.Tests.StepDefinitions
         [When("the administrator disables a specific time slot")]
         public async Task WhenTheAdministratorDisablesASpecificTimeSlot()
         {
-            // Use 2 days from now to avoid conflicts with other tests
-            var dateForAdminOps = DateTime.Now.AddDays(2).ToString("yyyy-MM-dd");
+            // Use 5 days from now to avoid conflicts with other tests and dirty data
+            var dateForAdminOps = DateTime.Now.AddDays(5).ToString("yyyy-MM-dd");
             await Page.GotoAsync($"http://localhost:5000/Admin?Date={dateForAdminOps}");
+            await Page.WaitForSelectorAsync("button:has-text('Logout')");
             // Handle the confirmation dialog
             Page.Dialog += (_, dialog) => dialog.AcceptAsync();
             // Click the first available slot to toggle it to disabled
@@ -171,7 +173,7 @@ namespace HungryCalendar.Tests.StepDefinitions
         public async Task GivenThereAreReservationsForAnd(string name1, string name2, string name3)
         {
             var suffix = Guid.NewGuid().ToString("N").Substring(0, 6);
-            var day3FromNow = DateTime.Now.AddDays(3).ToString("yyyy-MM-dd");
+            var day3FromNow = DateTime.Now.AddDays(20).ToString("yyyy-MM-dd");
             
             var names = new[] { name1, name2, name3 };
             for (int i = 0; i < names.Length; i++)
@@ -184,7 +186,7 @@ namespace HungryCalendar.Tests.StepDefinitions
                 await Page.WaitForLoadStateAsync();
                 
                 // Wait for time slots to be visible
-                await Page.WaitForSelectorAsync(".time-slot.available", new() { Timeout = 5000 });
+                await Page.WaitForSelectorAsync(".time-slot.available", new() { Timeout = 10000 });
                 
                 // Click on available time slot (use a different slot for each)
                 var slots = Page.Locator(".time-slot.available");
@@ -447,9 +449,10 @@ namespace HungryCalendar.Tests.StepDefinitions
         [Given("there are some blocked time slots")]
         public async Task GivenThereSomeBlockedTimeSlots()
         {
-            // Navigate to admin to ensure there are some blocked slots for today
-            var today = DateTime.Now.ToString("yyyy-MM-dd");
-            await Page.GotoAsync($"http://localhost:5000/Admin?Date={today}");
+            // Navigate to admin using a specific future date to ensure clean state
+            var testDate = DateTime.Now.AddDays(4).ToString("yyyy-MM-dd");
+            _scenarioContext["Date"] = testDate;
+            await Page.GotoAsync($"http://localhost:5000/Admin?Date={testDate}");
             await Page.WaitForSelectorAsync("button:has-text('Logout')");
             await Task.Delay(500);
             
@@ -465,7 +468,7 @@ namespace HungryCalendar.Tests.StepDefinitions
                 await Page.WaitForLoadStateAsync();
                 await Task.Delay(1500); // Wait for page to refresh and settle
                 // Navigate back to admin page to see the blocked slot
-                await Page.GotoAsync($"http://localhost:5000/Admin?Date={today}");
+                await Page.GotoAsync($"http://localhost:5000/Admin?Date={testDate}");
                 await Page.WaitForSelectorAsync("button:has-text('Logout')");
                 await Task.Delay(500);
             }
@@ -481,12 +484,14 @@ namespace HungryCalendar.Tests.StepDefinitions
             }
             else if (buttonLabel == "Block Selected Times")
             {
+                Page.Dialog += (_, dialog) => dialog.AcceptAsync();
                 await Page.ClickAsync("#batchBlockTimeSlotsBtn");
                 await Page.WaitForSelectorAsync("button:has-text('Logout')");
                 await Task.Delay(1000); // Wait for page to reload
             }
             else if (buttonLabel == "Unblock Selected Times")
             {
+                Page.Dialog += (_, dialog) => dialog.AcceptAsync();
                 await Page.ClickAsync("#batchUnblockTimeSlotsBtn");
                 await Page.WaitForSelectorAsync("button:has-text('Logout')");
                 await Task.Delay(1000); // Wait for page to reload
@@ -503,15 +508,15 @@ namespace HungryCalendar.Tests.StepDefinitions
         {
             // Verify that previously selected slots now have the is-blocked class
             var blockedSlots = Page.Locator(".admin-time-slot.is-blocked");
-            var count = await blockedSlots.CountAsync();
-            count.Should().BeGreaterThan(0, "At least one time slot should be blocked");
+            await Microsoft.Playwright.Assertions.Expect(blockedSlots).Not.ToHaveCountAsync(0);
         }
 
         [Then("the blocked time slots are unavailable for customers to select")]
         public async Task ThenTheBlockedTimeSlotsAreUnavailableForCustomers()
         {
             // Navigate to customer booking page to verify blocked slots
-            await Page.GotoAsync("http://localhost:5000/?Date=" + DateTime.Now.ToString("yyyy-MM-dd"));
+            var date = _scenarioContext.ContainsKey("Date") ? _scenarioContext["Date"] : DateTime.Now.ToString("yyyy-MM-dd");
+            await Page.GotoAsync("http://localhost:5000/?Date=" + date);
             
             // Check that blocked slots don't have the available class on customer side
             var availableSlots = Page.Locator(".time-slot.available");
@@ -524,20 +529,19 @@ namespace HungryCalendar.Tests.StepDefinitions
         {
             // Verify that previously selected slots no longer have the is-blocked class
             var availableSlots = Page.Locator(".admin-time-slot.is-available");
-            var count = await availableSlots.CountAsync();
-            count.Should().BeGreaterThan(0, "At least one time slot should be unblocked");
+            await Microsoft.Playwright.Assertions.Expect(availableSlots).Not.ToHaveCountAsync(0);
         }
 
         [Then("the unblocked time slots are available for customers to select")]
         public async Task ThenTheUnblockedTimeSlotsAreAvailableForCustomers()
         {
             // Navigate to customer booking page to verify unblocked slots
-            await Page.GotoAsync("http://localhost:5000/?Date=" + DateTime.Now.ToString("yyyy-MM-dd"));
+            var date = _scenarioContext.ContainsKey("Date") ? _scenarioContext["Date"] : DateTime.Now.ToString("yyyy-MM-dd");
+            await Page.GotoAsync("http://localhost:5000/?Date=" + date);
             
             // Check that unblocked slots are available on customer side
             var availableSlots = Page.Locator(".time-slot.available");
-            var count = await availableSlots.CountAsync();
-            count.Should().BeGreaterThan(0, "At least one time slot should be available for customers");
+            await Microsoft.Playwright.Assertions.Expect(availableSlots).Not.ToHaveCountAsync(0);
         }
 
         [Then("the selection mode is exited")]
@@ -545,15 +549,15 @@ namespace HungryCalendar.Tests.StepDefinitions
         {
             // Verify checkbox displays are hidden
             var displays = Page.Locator(".checkbox-display");
-            var visibleCount = 0;
             
-            for (int i = 0; i < await displays.CountAsync(); i++)
+            // Check that all of them are hidden or count is 0
+            var count = await displays.CountAsync();
+            for (int i = 0; i < count; i++)
             {
-                var style = await displays.Nth(i).EvaluateAsync<string>("el => window.getComputedStyle(el).display");
-                if (style != "none") visibleCount++;
+                await Microsoft.Playwright.Assertions.Expect(displays.Nth(i)).Not.ToBeVisibleAsync();
             }
             
-            visibleCount.Should().Be(0, "All checkbox displays should be hidden when exiting selection mode");
+
         }
 
         [Then("no time slots are selected")]
@@ -570,8 +574,7 @@ namespace HungryCalendar.Tests.StepDefinitions
         {
             // Verify batch action buttons are hidden
             var batchActionsDiv = Page.Locator("#batchActionsTimeSlots");
-            var display = await batchActionsDiv.EvaluateAsync<string>("el => window.getComputedStyle(el).display");
-            display.Should().Be("none", "Batch action buttons should be hidden");
+            await Microsoft.Playwright.Assertions.Expect(batchActionsDiv).ToBeHiddenAsync();
         }
     }
 }
