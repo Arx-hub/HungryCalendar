@@ -38,3 +38,7 @@ All tests are currently marked as `Pending` (`throw new PendingStepException();`
 To implement a test:
 1.  Open the corresponding `StepDefinitions` file.
 2.  Replace the `PendingStepException` with actual Playwright code (e.g., `await Page.ClickAsync(...)`).
+## Race-condition tests
+
+- Some tests intentionally simulate concurrency to validate the application's transaction and availability checks. For example, the double-booking test performs an end-to-end simulation using two Playwright pages so competing users exercise the same server-side code paths instead of manipulating the DB directly.
+- If these tests are flaky on CI, try increasing Playwright timeouts or adding diagnostics (logs or DB snapshots) to help investigate.

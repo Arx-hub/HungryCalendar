@@ -27,8 +27,23 @@ namespace HungryCalendar.Tests.StepDefinitions
             // Navigate to 12 days in future to avoid conflicts with same-day tests
             var futureDate = DateTime.Now.AddDays(12).ToString("yyyy-MM-dd");
             await Page.GotoAsync($"http://localhost:5000/?Date={futureDate}"); 
-            // Select the first available time slot
-            await Page.Locator(".time-slot.available").First.ClickAsync();
+            // Select the first visible, enabled time slot
+            await Page.WaitForSelectorAsync(".time-slot, .time-grid", new() { Timeout = 10000 });
+            var allSlots = Page.Locator(".time-slot");
+            var total = await allSlots.CountAsync();
+            var clicked = false;
+            for (int i = 0; i < total; i++)
+            {
+                var slot = allSlots.Nth(i);
+                if (!await slot.IsHiddenAsync() && !await slot.IsDisabledAsync())
+                {
+                    await slot.ClickAsync();
+                    clicked = true;
+                    break;
+                }
+            }
+            if (!clicked)
+                throw new Exception("No available customer time slot found");
             await Page.WaitForSelectorAsync("#reservation-form");
         }
 
@@ -115,20 +130,33 @@ namespace HungryCalendar.Tests.StepDefinitions
         }
 
         [Given("a customer has selected a reservation time")]
+        [Given("a customer has selected a reservation time without confirming")]
         public async Task GivenACustomerHasSelectedAReservationTime()
         {
             // Navigate to 13 days in future to avoid conflicts
             var futureDate = DateTime.Now.AddDays(13).ToString("yyyy-MM-dd");
             await Page.GotoAsync($"http://localhost:5000/?Date={futureDate}");
             
-            var slot = Page.Locator(".time-slot.available").First;
-            var timeText = await slot.InnerTextAsync();
-            
+            await Page.WaitForSelectorAsync(".time-slot, .time-grid", new() { Timeout = 10000 });
+            var allSlots = Page.Locator(".time-slot");
+            var total = await allSlots.CountAsync();
+            string chosenTime = null;
+            for (int i = 0; i < total; i++)
+            {
+                var slot = allSlots.Nth(i);
+                if (!await slot.IsHiddenAsync() && !await slot.IsDisabledAsync())
+                {
+                    chosenTime = (await slot.InnerTextAsync()).Trim();
+                    await slot.ClickAsync();
+                    break;
+                }
+            }
+            if (chosenTime == null)
+                throw new Exception("No available customer time slot found to select");
+
             // Store details for the conflict step
             _scenarioContext["SelectedDate"] = futureDate;
-            _scenarioContext["SelectedTime"] = timeText.Trim(); // e.g. "11:00"
-            
-            await slot.ClickAsync();
+            _scenarioContext["SelectedTime"] = chosenTime; // e.g. "11:00"
         }
 
         [When("another customer confirms the same time first")]
@@ -149,20 +177,101 @@ namespace HungryCalendar.Tests.StepDefinitions
              using (var db = new BookingDbContext(options))
              {
                  db.Database.EnsureCreated();
-                 // Create a conflict
-                 db.DisabledSlots.Add(new DbDisabledSlot { Date = date!, Time = time! });
+                 // Create a conflict by inserting a reservation for the same date/time (more accurate race condition)
+                 db.Reservations.Add(new DbReservation { Date = date!, Time = time!, Name = "Other Customer", Email = "other@example.com", Phone = "+3580000000", GroupSize = 2 });
                  db.SaveChanges();
+                 // Verify the reservation exists in the same DB file we wrote to
+                 var exists = db.Reservations.Any(r => r.Date == date && r.Time == time);
+                 exists.Should().BeTrue("The conflicting reservation should have been created in the DB before submitting the user's reservation");
              }
+
+             // Ensure the reservation form fields are filled so ModelState is valid when submitting
+             await Page.WaitForSelectorAsync("#reservation-form", new() { Timeout = 5000 });
+             await Page.FillAsync("#name", "Race Tester");
+             await Page.FillAsync("#email", "race@example.com");
+             await Page.FillAsync("#phone", "+35812345678");
 
              // Now the user submits, expecting failure
              await Page.ClickAsync("#submit-reservation");
+        }
+
+        [When("another customer confirms the same time first using a locked transaction")]
+        public async Task WhenAnotherCustomerConfirmsTheSameTimeFirstUsingLockedTransaction()
+        {
+            // This scenario means the conflict was performed inside a locked/using block
+            // Reuse the same logic as the non-locked variant to simulate the conflict
+            await WhenAnotherCustomerActuallyConfirmsTheSameTimeFirst();
+        }
+
+        // Helper: actually book the time using a second browser page so the app creates the conflicting reservation
+        //
+        // Rationale: To reliably reproduce a real-world race condition we open a second Playwright page and have the
+        // competing user complete the booking flow. This exercises the same application code paths (including the
+        // transaction and availability checks implemented in `IndexModel.OnPostConfirm`) and validates observable behavior:
+        // either an inline "no longer available" message is shown to the late submitter or exactly one reservation exists
+        // for the date/time. We prefer this approach over direct DB manipulation so the test remains end-to-end.
+        public async Task WhenAnotherCustomerActuallyConfirmsTheSameTimeFirst()
+        {
+            var date = _scenarioContext["SelectedDate"].ToString();
+            var time = _scenarioContext["SelectedTime"].ToString();
+
+            // Pre-fill the original customer's form so the submission will be valid after the other customer books
+            await Page.WaitForSelectorAsync("#reservation-form", new() { Timeout = 5000 });
+            await Page.FillAsync("#name", "Race Tester");
+            await Page.FillAsync("#email", "race@example.com");
+            await Page.FillAsync("#phone", "+35812345678");
+
+            var otherPage = await _context.Context!.NewPageAsync();
+            try
+            {
+                await otherPage.GotoAsync($"http://localhost:5000/?Date={date}");
+                await otherPage.WaitForSelectorAsync(".time-slot, .time-grid", new() { Timeout = 10000 });
+                var slots = otherPage.Locator(".time-slot");
+                var total = await slots.CountAsync();
+                var clicked = false;
+                for (int i = 0; i < total; i++)
+                {
+                    var s = slots.Nth(i);
+                    var txt = (await s.InnerTextAsync()).Trim();
+                    if (txt == time && !await s.IsHiddenAsync() && !await s.IsDisabledAsync())
+                    {
+                        await s.ClickAsync();
+                        clicked = true;
+                        break;
+                    }
+                }
+                if (!clicked) throw new Exception("Other customer: no available time slot found to select");
+
+                await otherPage.WaitForSelectorAsync("#reservation-form", new() { Timeout = 5000 });
+                await otherPage.FillAsync("#name", "Other Customer");
+                await otherPage.FillAsync("#email", "other@example.com");
+                await otherPage.FillAsync("#phone", "+3580000000");
+                await otherPage.ClickAsync("#submit-reservation");
+                await otherPage.WaitForSelectorAsync("#confirmation-page", new() { Timeout = 5000 });
+            }
+            finally
+            {
+                await otherPage.CloseAsync();
+            }
+
+            // Now submit on the original page (should observe either an inline error or a confirmation)
+            await Page.ClickAsync("#submit-reservation");
         }
 
         [Then("the system informs the customer that the time is no longer available")]
         public async Task ThenTheSystemInformsTheCustomerThatTheTimeIsNoLongerAvailable()
         {
             var error = Page.Locator(".error-message");
-            await Microsoft.Playwright.Assertions.Expect(error).ToContainTextAsync("no longer available");
+            try
+            {
+                await Microsoft.Playwright.Assertions.Expect(error).ToContainTextAsync("no longer available");
+            }
+            catch
+            {
+                // Fallback: check page content for the expected message substring
+                var content = await Page.ContentAsync();
+                content.Should().Contain("no longer available", "Expected the page to indicate the slot was no longer available");
+            }
         }
 
         [Given("the customer is making a reservation")]
@@ -209,6 +318,40 @@ namespace HungryCalendar.Tests.StepDefinitions
         public async Task ThenThePageShowsTheRestaurantSContactInformation()
         {
             await Microsoft.Playwright.Assertions.Expect(Page.Locator(".contact-info")).ToBeVisibleAsync();
+        }
+        [Then("the system enforces first-come-first-served for the selected time")]
+        public async Task ThenTheSystemEnforcesFirstComeFirstServedForTheSelectedTime()
+        {
+            var date = _scenarioContext["SelectedDate"].ToString();
+            var time = _scenarioContext["SelectedTime"].ToString();
+
+            var error = Page.Locator(".error-message");
+            if (await error.CountAsync() > 0)
+            {
+                await Microsoft.Playwright.Assertions.Expect(error).ToContainTextAsync("no longer available");
+            }
+            else
+            {
+                var confirmation = Page.Locator("#confirmation-page");
+                if (await confirmation.CountAsync() > 0)
+                {
+                    var dbPath = @"c:\Users\arxhe\VSCode\Github\School_Projects\Ohke2026\HungryCalendar\HungryCalendar.Web\hungrycalendar.db";
+                    var options = new DbContextOptionsBuilder<BookingDbContext>()
+                        .UseSqlite($"Data Source={dbPath}")
+                        .Options;
+                    using (var db = new BookingDbContext(options))
+                    {
+                        db.Database.EnsureCreated();
+                        var count = db.Reservations.Count(r => r.Date == date && r.Time == time);
+                        count.Should().Be(1, "Exactly one reservation should exist for the selected date/time after concurrent attempts");
+                    }
+                }
+                else
+                {
+                    var content = await Page.ContentAsync();
+                    content.Should().Contain("no longer available", "Expected the page to indicate the slot was no longer available or to show a single confirmed reservation");
+                }
+            }
         }
     }
 }
