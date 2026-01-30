@@ -243,15 +243,15 @@ namespace HungryCalendar.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Double booking is prevented")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="First-come-first-served when two customers select the same time")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Customer Booking")]
-        [global::Xunit.TraitAttribute("Description", "Double booking is prevented")]
-        public async global::System.Threading.Tasks.Task DoubleBookingIsPrevented()
+        [global::Xunit.TraitAttribute("Description", "First-come-first-served when two customers select the same time")]
+        public async global::System.Threading.Tasks.Task First_Come_First_ServedWhenTwoCustomersSelectTheSameTime()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Double booking is prevented", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("First-come-first-served when two customers select the same time", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 23
@@ -265,13 +265,13 @@ namespace HungryCalendar.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 24
-    await testRunner.GivenAsync("a customer has selected a reservation time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("a customer has selected a reservation time without confirming", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 25
-    await testRunner.WhenAsync("another customer confirms the same time first", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("another customer confirms the same time first using a locked transaction", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 26
-    await testRunner.ThenAsync("the system informs the customer that the time is no longer available", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the system enforces first-come-first-served for the selected time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -22,7 +22,22 @@ namespace HungryCalendar.Tests.StepDefinitions
             var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
             await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
             // Select a time just to get to the form
-            await Page.ClickAsync(".time-slot.available >> nth=0");
+            await Page.WaitForSelectorAsync(".time-slot, .time-grid", new() { Timeout = 10000 });
+            var allSlots = Page.Locator(".time-slot");
+            var total = await allSlots.CountAsync();
+            var clicked = false;
+            for (int i = 0; i < total; i++)
+            {
+                var slot = allSlots.Nth(i);
+                if (!await slot.IsHiddenAsync() && !await slot.IsDisabledAsync())
+                {
+                    await slot.ClickAsync();
+                    clicked = true;
+                    break;
+                }
+            }
+            if (!clicked)
+                throw new Exception("No available customer time slot found to reach the contact form");
         }
 
         [When("the customer enters an invalid email address")]

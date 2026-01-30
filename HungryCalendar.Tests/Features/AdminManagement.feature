@@ -15,8 +15,8 @@ Feature: Admin Management
     Then the time slot becomes unavailable to customers
 
   Scenario: Administrator views group size for a reservation
-    Given the administrator is viewing a reservation in the calendar
-    When the reservation details are opened
+    Given the administrator is viewing the reservations in the admin view
+    When the reservations are visible
     Then the group size is displayed
     And the group size is clearly visible and correct
 

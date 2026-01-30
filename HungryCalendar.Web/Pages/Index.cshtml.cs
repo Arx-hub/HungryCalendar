@@ -72,29 +72,36 @@ namespace HungryCalendar.Web.Pages
                 return Page();
             }
 
-            // Persistence check
-            bool isTaken = await _db.Reservations.AnyAsync(r => r.Date == Date && r.Time == SelectedTime);
-            bool isDisabled = await _db.DisabledSlots.AnyAsync(d => d.Date == Date && d.Time == SelectedTime);
-
-            if (isTaken || isDisabled)
+            // Use an explicit transaction and serializable isolation to prevent race conditions
+            // This follows a "using"-style pattern to ensure the check-and-insert is atomic
+            using (var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable))
             {
-                ErrorMessage = "This time is no longer available. Please select another.";
-                SelectedTime = null;
-                GenerateSlots();
-                return Page();
+                // Re-check within the transaction to ensure a concurrent change is observed
+                bool isTaken = await _db.Reservations.AnyAsync(r => r.Date == Date && r.Time == SelectedTime);
+                bool isDisabled = await _db.DisabledSlots.AnyAsync(d => d.Date == Date && d.Time == SelectedTime);
+
+                if (isTaken || isDisabled)
+                {
+                    ErrorMessage = "This time is no longer available. Please select another.";
+                    SelectedTime = null;
+                    GenerateSlots();
+                    return Page();
+                }
+
+                _db.Reservations.Add(new DbReservation
+                {
+                    Date = Date!,
+                    Time = SelectedTime!,
+                    Name = Name!,
+                    Email = Email!,
+                    Phone = Phone!,
+                    GroupSize = GroupSize
+                });
+
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
 
-            _db.Reservations.Add(new DbReservation
-            {
-                Date = Date!,
-                Time = SelectedTime!,
-                Name = Name!,
-                Email = Email!,
-                Phone = Phone!,
-                GroupSize = GroupSize
-            });
-
-            await _db.SaveChangesAsync();
             BookingSuccess = true;
             return Page();
         }

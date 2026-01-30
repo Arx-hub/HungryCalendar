@@ -227,10 +227,10 @@ namespace HungryCalendar.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 18
-    await testRunner.GivenAsync("the administrator is viewing a reservation in the calendar", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the administrator is viewing the reservations in the admin view", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 19
-    await testRunner.WhenAsync("the reservation details are opened", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the reservations are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 20
     await testRunner.ThenAsync("the group size is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");

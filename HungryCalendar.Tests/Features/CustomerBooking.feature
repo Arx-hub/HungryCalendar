@@ -20,10 +20,10 @@ Feature: Customer Booking
     Then all reserved times are not selectable
     And reserved times are not visible or disabled
 
-  Scenario: Double booking is prevented
-    Given a customer has selected a reservation time
-    When another customer confirms the same time first
-    Then the system informs the customer that the time is no longer available
+  Scenario: First-come-first-served when two customers select the same time
+    Given a customer has selected a reservation time without confirming
+    When another customer confirms the same time first using a locked transaction
+    Then the system enforces first-come-first-served for the selected time
 
   Scenario: Confirmation page is displayed after reservation
     Given the customer is making a reservation

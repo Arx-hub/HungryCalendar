@@ -78,8 +78,33 @@ namespace HungryCalendar.Tests.StepDefinitions
             await Page.WaitForSelectorAsync("button:has-text('Logout')");
             // Handle the confirmation dialog
             Page.Dialog += (_, dialog) => dialog.AcceptAsync();
-            // Click the first available slot to toggle it to disabled
-            await Page.ClickAsync(".admin-time-slot.is-available >> nth=0");
+            // Click the first admin slot that is not blocked or reserved
+            var adminSlots = Page.Locator(".admin-time-slot");
+            var adminCount = await adminSlots.CountAsync();
+            var clicked = false;
+            for (int i = 0; i < adminCount; i++)
+            {
+                var cls = await adminSlots.Nth(i).GetAttributeAsync("class") ?? string.Empty;
+                if (!cls.Contains("is-blocked") && !cls.Contains("is-reserved"))
+                {
+                    await adminSlots.Nth(i).ClickAsync();
+                    clicked = true;
+                    break;
+                }
+            }
+
+            if (!clicked)
+            {
+                // Collect diagnostic info for debugging
+                var sample = new List<string>();
+                for (int k = 0; k < Math.Min(10, adminCount); k++)
+                {
+                    var c = await adminSlots.Nth(k).GetAttributeAsync("class") ?? string.Empty;
+                    var txt = await adminSlots.Nth(k).InnerTextAsync();
+                    sample.Add($"[{k}] classes={c} text='{txt}'");
+                }
+                throw new Exception($"No available admin time slot found to disable. Admin slot count={adminCount}. Sample: {string.Join("; ", sample)}");
+            }
         }
 
         [Then("the time slot becomes unavailable to customers")]
@@ -96,12 +121,29 @@ namespace HungryCalendar.Tests.StepDefinitions
             await Page.GotoAsync("http://localhost:5000/Admin");
         }
 
+        [Given("the administrator is viewing the reservations in the admin view")]
+        public async Task GivenTheAdministratorIsViewingTheReservationsInTheAdminView()
+        {
+            // Same as the original view step
+            await GivenTheAdministratorIsViewingAReservationInTheCalendar();
+        }
+
         [When("the reservation details are opened")]
         public async Task WhenTheReservationDetailsAreOpened()
         {
             // In the grid view, details are in the cards
             var cards = Page.Locator(".reservation-card");
             await Microsoft.Playwright.Assertions.Expect(cards).Not.ToHaveCountAsync(0);
+        }
+
+        [When("the reservations are visible")]
+        public async Task WhenTheReservationsAreVisible()
+        {
+            // Verify that at least one reservation card is visible (avoid strict mode on a multi-match selector)
+            var cards = Page.Locator(".reservation-card");
+            var count = await cards.CountAsync();
+            (count > 0).Should().BeTrue("Expected at least one reservation card to be present in the admin view");
+            await Microsoft.Playwright.Assertions.Expect(cards.First).ToBeVisibleAsync();
         }
 
         [Then("the group size is displayed")]
@@ -129,7 +171,25 @@ namespace HungryCalendar.Tests.StepDefinitions
                 // Go to home and create one (using tomorrow to avoid conflicts)
                 var tomorrow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
                 await Page.GotoAsync($"http://localhost:5000/?Date={tomorrow}");
-                await Page.ClickAsync(".time-slot.available >> nth=0");
+                // Click first available customer slot (fallback if selector doesn't match expected class)
+                var custSlots = Page.Locator(".time-slot");
+                var custCount = await custSlots.CountAsync();
+                var clickedCust = false;
+                for (int j = 0; j < custCount; j++)
+                {
+                    var slot = custSlots.Nth(j);
+                    var isHidden = await slot.IsHiddenAsync();
+                    var isDisabled = await slot.IsDisabledAsync();
+                    if (!isHidden && !isDisabled)
+                    {
+                        await slot.ClickAsync();
+                        clickedCust = true;
+                        break;
+                    }
+                }
+                if (!clickedCust)
+                    throw new Exception("No available customer time slot found to create a reservation for deletion test");
+
                 await Page.FillAsync("#name", "Temp Admin");
                 await Page.FillAsync("#email", "admin@test.com");
                 await Page.FillAsync("#phone", "+3580000000");
@@ -186,17 +246,27 @@ namespace HungryCalendar.Tests.StepDefinitions
                 await Page.WaitForLoadStateAsync();
                 
                 // Wait for time slots to be visible
-                await Page.WaitForSelectorAsync(".time-slot.available", new() { Timeout = 10000 });
-                
+                await Page.WaitForSelectorAsync(".time-slot, .time-grid", new() { Timeout = 10000 });
+
                 // Click on available time slot (use a different slot for each)
-                var slots = Page.Locator(".time-slot.available");
-                var slotCount = await slots.CountAsync();
-                if (slotCount <= i)
+                var allSlots = Page.Locator(".time-slot");
+                var usableSlots = new List<Microsoft.Playwright.ILocator>();
+                var total = await allSlots.CountAsync();
+                for (int s = 0; s < total; s++)
                 {
-                    throw new Exception($"Not enough available slots. Expected at least {i + 1}, found {slotCount}");
+                    var sl = allSlots.Nth(s);
+                    var isHidden = await sl.IsHiddenAsync();
+                    var isDisabled = await sl.IsDisabledAsync();
+                    if (!isHidden && !isDisabled)
+                        usableSlots.Add(sl);
                 }
-                
-                await slots.Nth(i).ClickAsync();
+
+                if (usableSlots.Count <= i)
+                {
+                    throw new Exception($"Not enough available slots. Expected at least {i + 1}, found {usableSlots.Count}");
+                }
+
+                await usableSlots[i].ClickAsync();
                 
                 // Wait for form to appear after slot click
                 await Page.WaitForSelectorAsync("#name", new() { Timeout = 3000 });
