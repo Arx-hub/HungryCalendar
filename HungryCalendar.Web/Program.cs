@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<BookingDbContext>(options =>
-    options.UseSqlite("Data Source=hungrycalendar.db"));
+    options.UseSqlite(@"Data Source=c:\Users\arxhe\VSCode\Github\School_Projects\Ohke2026\HungryCalendar\HungryCalendar.Web\hungrycalendar.db"));
 
 builder.Services.AddSession(options =>
 {
